@@ -1,0 +1,37 @@
+# depslib dependency file v1.0
+1614605361 source:/home/artur/Projekty/BigNumber/BigNumber/src/bignumber.cpp
+	"bignumber.h"
+	<stdlib.h>
+	<iostream>
+	<bitset>
+
+1614590379 /home/artur/Projekty/BigNumber/BigNumber/include/bignumber.h
+	"digit.h"
+
+1596022276 source:/home/artur/Projekty/BigNumber/BigNumber/src/digit.cpp
+	"digit.h"
+
+1596022256 /home/artur/Projekty/BigNumber/BigNumber/include/digit.h
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<unistd.h>
+
+1614605421 source:/home/artur/Projekty/BigNumber/BigNumber/main.cpp
+	<iostream>
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<unistd.h>
+	"bignumber.h"
+	<bitset>
+
+1584874321 /home/artur/Projekty/BigNumber/BigNumber/bignumber.h
+	"digit.h"
+
+1582451765 /home/artur/Projekty/BigNumber/BigNumber/digit.h
+	<stdio.h>
+	<stdlib.h>
+	<stdint.h>
+	<unistd.h>
+
