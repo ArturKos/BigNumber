@@ -6,8 +6,8 @@
 #include <bitset>
 #include <iostream>
 
-#include "include/digit.cpp"
-#include "include/bignumber.cpp"
+#include "include/digit.h"
+#include "include/bignumber.h"
 
 using namespace std;
 
