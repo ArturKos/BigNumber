@@ -1,6 +1,6 @@
 FLAGS=-Wall -Wextra
-OBJS=main.cpp
-TEST=test.cpp
+OBJS=main.cpp include/bignumber.cpp include/digit.cpp
+TEST=test.cpp include/bignumber.cpp include/digit.cpp
 
 cut: $(OBJS)
 	$(CXX) $(FLAGS) $(OBJS) -o bignumber
