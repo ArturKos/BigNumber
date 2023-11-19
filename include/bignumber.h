@@ -1,15 +1,17 @@
 #ifndef BIGNUMBER_H
 #define BIGNUMBER_H
-#include "digit.h"
+#include "../include/digit.h"
 
 class bignumber {
  public:
   bignumber();
+  bignumber(const bignumber& obj); //copy construktor
   bignumber(uint8_t d);
   bignumber(uint16_t d);
   bignumber(uint32_t d);
   bignumber(uint64_t d);
   virtual ~bignumber();
+  uint64_t toUINT64();
   void printHEX();
   void printDEC();
   void printBIN() const;
@@ -28,15 +30,14 @@ class bignumber {
   void bitright();
   void onebitpush();
   bignumber pow_fast(bignumber *l);
-  bignumber sqrtc(
-      bignumber *l);  // obliczanie pierwiastka kwadratowego calkowitego
+  bignumber sqrtc(bignumber *l);  // obliczanie pierwiastka kwadratowego calkowitego
   void EqualBits(bignumber &b);  // tyle samo bitów w obu liczbach
   bignumber operator+(const bignumber &obj);
   bignumber operator-(const bignumber &obj);
   bignumber operator*(const bignumber &obj);
   bignumber operator/(const bignumber &obj);
   bignumber operator%(const bignumber &obj);
-  bignumber &operator=(const bignumber &obj);
+  bignumber& operator=(const bignumber &obj);
 
   bool operator==(const bignumber &obj);
   bool operator>=(const bignumber &obj);
