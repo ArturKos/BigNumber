@@ -1,25 +1,65 @@
-#include "bignumber.h"
+#include "../include/bignumber.h"
 
 #include <stdlib.h>
-
+#include <string>
 #include <bitset>
 #include <iostream>
+#include <algorithm>
+
 
 bignumber::bignumber() {
   first_digit = NULL;
   last_digit = NULL;
   negative = false;
 }
+uint64_t bignumber::toUINT64(){
+  char num_to_convert[2048] = {'\0'};
+  long return_value = 0;
+  uint64_t char_idx = 0;
+  digit *tmp = this->GetLastDigit();
+
+  while (tmp != NULL) {
+      std::bitset<8> data((uint8_t)tmp->GetData());
+    	for (int i=7; i>=0; i--)
+        {
+          if (data.test(i))
+            num_to_convert[char_idx] = '1';
+          else
+            num_to_convert[char_idx] = '0';
+          if(char_idx<2048) char_idx++;
+          //if(i==0) break;
+        }
+    tmp = tmp->GetPrevDigit();
+  }
+  return_value = strtol(num_to_convert, NULL, 2);
+  return return_value;
+}
+bignumber::bignumber(const bignumber& obj) {
+
+  if (this == &obj) return;
+  first_digit = NULL;
+  last_digit = NULL;
+  negative = obj.negative;
+  digit *tmp1 = obj.GetFristDigit();
+  rm_all_bits();
+  while (tmp1 != NULL) {
+    push_data((uint8_t)tmp1->GetData());
+    tmp1 = tmp1->GetNextDigit();
+  }
+  optimize();
+}
 
 bignumber::bignumber(uint8_t d) {
   first_digit = NULL;
   last_digit = NULL;
   negative = false;
+/*
   if (d < 0) {
     negative = true;
     d = ~d;
     d += 1;
   }
+*/
   push_data(d);
 }
 
@@ -27,18 +67,18 @@ bignumber::bignumber(uint16_t d) {
   first_digit = NULL;
   last_digit = NULL;
   negative = false;
-  push_data((uint8_t)d);
-  push_data((uint8_t)d >> 8);
+  push_data( (d >> 0) & 0xFF);
+  push_data( (d >> 8) & 0xFF);
 }
 
 bignumber::bignumber(uint32_t d) {
   first_digit = NULL;
   last_digit = NULL;
   negative = false;
-  push_data((uint8_t)d);
-  push_data((uint8_t)d >> 8);
-  push_data((uint8_t)d >> 16);
-  push_data((uint8_t)d >> 24);
+  push_data( (d >> 0) & 0xFF);
+  push_data( (d >> 8) & 0xFF);
+  push_data( (d >> 16) & 0xFF);
+  push_data( (d >> 24) & 0xFF);
 }
 
 bignumber::~bignumber() {
@@ -62,21 +102,23 @@ void bignumber::printBIN() const {
   }
 }
 void bignumber::printDEC() {
-  std::cout << "Print DEC" << std::endl;
-  bignumber tmp, dec, reszta, zero((uint8_t)0), dziesiec((uint8_t)10);
+  bignumber tmp, dec(*this), reszta, zero((uint8_t)0), dziesiec((uint8_t)10), jeden((uint8_t)1), tmp_dec((uint8_t)0);
   digit *d;
-  dec = *this;
-  uint8_t l = 0;
+  std::string decimal_number = "";
+  char decimal_numbers[] = "0123456789";
 
   while (dec != zero) {
-    reszta = dec % dziesiec;
-    dec = dec / dziesiec;
+    reszta = dec % dziesiec; //std::cout << "tmp_dec="; tmp_dec.printHEX(); std::cout << std::endl;
     if (reszta.GetFristDigit() != NULL) {
-      d = reszta.GetFristDigit();
-      l = d->GetData();
-      printf("%d", l);
+      decimal_number.push_back(decimal_numbers[reszta.GetFristDigit()->GetData()]);
     }
+    if(dec == zero) decimal_number.push_back(decimal_numbers[0]);
+    //std::cout << "reszta="; reszta.printHEX(); std::cout << std::endl;
+    dec = dec / dziesiec; 
+    //std::cout << "dec="; dec.printHEX(); std::cout << std::endl;
   }
+  reverse(decimal_number.begin(), decimal_number.end());
+  std::cout << decimal_number << std::endl;
 }
 bool bignumber::GetNegative() { return negative; }
 void bignumber::SetNegative(bool b) { negative = b; }
@@ -128,15 +170,18 @@ void bignumber::push_data_to_end(uint8_t d) {}
 
 void bignumber::not_bits() {
   digit *tmp = first_digit;
+  //std::cout << "before_not_bits="; this->printBIN(); std::cout << std::endl;
 
   while (tmp != NULL) {
     tmp->SetData(~tmp->GetData());
     tmp = tmp->GetNextDigit();
-  }
+  } 
+  //std::cout << "not_bits=       "; this->printBIN(); std::cout << std::endl;  
 }
 
 void bignumber::set_minus() {
   digit *tmp = first_digit;
+    std::cout << "before_setminus() =       "; this->printBIN(); std::cout << std::endl; 
 
   while (tmp != NULL) {
     if (tmp->GetNextDigit() == NULL) {
@@ -146,20 +191,21 @@ void bignumber::set_minus() {
     }
     tmp = tmp->GetNextDigit();
   }
+      std::cout << "after_setminus()  =       "; this->printBIN(); std::cout << std::endl; 
 }
 void bignumber::optimize() {
   digit *tmp = this->GetLastDigit(), *del;
   if (this->GetFristDigit() == this->GetLastDigit()) return;
-  while (tmp != NULL) {
-    if (tmp->GetData() == 0) {
+  //std::cout << "before optimise  =       "; this->printBIN(); std::cout << std::endl;
+
+  while (tmp != NULL && tmp != this->GetFristDigit() && tmp->GetData() == 0) {
       del = tmp;
       tmp = tmp->GetPrevDigit();
       tmp->SetNextDigit(NULL);
       this->SetLastDigit(tmp);
       delete del;
-    } else
-      break;
   }
+    //std::cout << "after optimise   =       "; this->printBIN(); std::cout << std::endl;
 }
 
 void bignumber::rm_all_bits() {
@@ -176,8 +222,10 @@ void bignumber::rm_all_bits() {
 
 void bignumber::addone()  // pomocnicza funkcja do odejmowania zu2, dodaje do
                           // liczby 1 ostatni bit jest tracony
-{
-  uint16_t addition = 1;
+{     //std::cout << "before_addone()=       "; this->printBIN(); std::cout << std::endl;
+  *this = *this + bignumber((uint8_t)1);
+    //std::cout << "after_addone() =       "; this->printBIN(); std::cout << std::endl;
+ /* uint16_t addition = 1;
   digit *tmp1 = this->GetFristDigit();
 
   while (tmp1 != NULL) {
@@ -185,7 +233,7 @@ void bignumber::addone()  // pomocnicza funkcja do odejmowania zu2, dodaje do
     tmp1->SetData((uint8_t)addition);
     addition >>= 8;
     tmp1 = tmp1->GetNextDigit();
-  }
+  }*/
 }
 
 void bignumber::bitleft() {
@@ -234,42 +282,44 @@ void bignumber::bitright() {
 }
 // dzielenie według opisu https://eduinf.waw.pl/inf/alg/006_bin/0012.php
 bignumber bignumber::operator/(const bignumber &obj) {
-  bignumber dividend,  // dzielna i jednoczeście wynik dzielenia
-      divider,         // dzielnik
-      difference;      // dzielnik po wyrównaniu bitów ale
-  bignumber wynik_dzielenia((uint8_t)0);
+   bignumber dividend,  // dzielna i jednoczeście wynik dzielenia
+             divider;   // dzielnik
+  bignumber wynik_dzielenia((uint8_t)0), jeden((uint8_t)1), zero((uint8_t)0);
   dividend = *this;
   divider = obj;
   dividend.optimize();
   divider.optimize();
   dividend.EqualBits(divider);  // wyrównanie bitów, każda liczba tyle samo
                                 // bitów
+  if(dividend < divider) return wynik_dzielenia; else
+  if(dividend == zero) return wynik_dzielenia; else// dzielna jest równa 0 zwracamy 0
+  if(dividend == divider) { // dzielna i dzielnik są równe, zwracamy 1 lub -1
+      if (this->negative != obj.negative) jeden.negative = true;
+      return jeden;
+  } 
+  if(divider == jeden) return dividend;
+
+
   digit *tmp1 = dividend.GetLastDigit(), *tmp2 = divider.GetLastDigit();
   // zrównanie najstarszego bitu dzielnej i dzielnika
-  for (register int i = 7; i >= 0; i--) {
+  for (int i = 7; i >= 0; i--) {
     if ((tmp1->GetData() >> i) & 1) {
       while (!((tmp2->GetData() >> i) & 1)) divider.bitleft();
       break;
     }
-  }  // std::cout << "Rozpoczynam dzielenie" << std::endl;
-  // dividend.printBIN();  std::cout << std::endl;
-  // divider.printBIN();  std::cout << std::endl;
-  bool pass = true;  // zmienna pomocnicza, zapewnia jeszcze jeden przepieg w
+  }  
+  bool pass = true;  // zmienna pomocnicza, zapewnia jeszcze jeden przebieg w
                      // przypadku kiedy dzielnik powocil do pierwotnej postaci
   while (divider != obj || pass) {
-    //   std::cout << "While" << std::endl;
     if (divider == obj) pass = false;
     if (dividend >= divider) {
-      difference = dividend - divider;  // std::cout << "Różnica" << std::endl;
-      // difference.printBIN(); std::cout << std::endl;
-      dividend = difference;  // dividend to reszta z dzielenia
+      dividend = dividend - divider; 
       wynik_dzielenia.onebitpush();
     } else
       wynik_dzielenia.bitleft();
-    if (pass) divider.bitright();  // std::cout << "dzielnik ";
-    //  divider.printBIN();  std::cout << std::endl; std::cout << "dzielna  ";
-    // dividend.printBIN(); std::cout << std::endl;
+    if (pass) divider.bitright();
   }
+  if (this->negative != obj.negative) wynik_dzielenia.negative = true;
   return wynik_dzielenia;
 }
 
@@ -282,35 +332,37 @@ void bignumber::onebitpush() {
   tmp1->SetData(data);
 }
 bignumber bignumber::operator%(const bignumber &obj) {
-  bignumber dividend,  // dzielna i jednoczeście wynik dzielenia
-      divider,         // dzielnik
-      difference;      // dzielnik po wyrównaniu bitów ale
-
+   bignumber dividend,  // dzielna i jednoczeście wynik dzielenia
+             divider;   // dzielnik
+  bignumber jeden((uint8_t)1), zero((uint8_t)0);
   dividend = *this;
   divider = obj;
   dividend.optimize();
   divider.optimize();
   dividend.EqualBits(divider);  // wyrównanie bitów, każda liczba tyle samo
                                 // bitów
+  if(dividend < divider) return dividend; else
+  if(dividend == zero) return zero; else// dzielna jest równa 0 zwracamy 0
+  if(dividend == divider) return zero; else// dzielna i dzielnik są równe, zwracamy 0
+  if(divider == jeden) return zero;
   digit *tmp1 = dividend.GetLastDigit(), *tmp2 = divider.GetLastDigit();
   // zrównanie najstarszego bitu dzielnej i dzielnika
-  for (register int i = 7; i >= 0; i--) {
+  for (int i = 7; i >= 0; i--) {
     if ((tmp1->GetData() >> i) & 1) {
       while (!((tmp2->GetData() >> i) & 1)) divider.bitleft();
       break;
     }
-  }
+  }  
   bool pass = true;  // zmienna pomocnicza, zapewnia jeszcze jeden przepieg w
                      // przypadku kiedy dzielnik powocil do pierwotnej postaci
   while (divider != obj || pass) {
     if (divider == obj) pass = false;
     if (dividend >= divider) {
-      difference = dividend - divider;  
-      dividend = difference;
+      dividend = dividend - divider; 
     }
-    if (pass) divider.bitright(); 
+    if (pass) divider.bitright();
   }
-  return dividend;
+  return dividend; //reszta z dzielenia
 }
 
 bignumber bignumber::operator*(const bignumber &obj) {
@@ -320,7 +372,7 @@ bignumber bignumber::operator*(const bignumber &obj) {
   uint8_t data;
 
   while (tmp1 != NULL) {
-    for (register uint8_t i = 0; i < 8; i++) {
+    for (uint8_t i = 0; i < 8; i++) {
       data = tmp1->GetData();
       if ((data >> i) & 1) res = res + multiplier;
       multiplier.bitleft();
@@ -328,6 +380,7 @@ bignumber bignumber::operator*(const bignumber &obj) {
     tmp1 = tmp1->GetNextDigit();
   }
   res.optimize();
+  if (this->negative != obj.negative) res.negative = true;
   return res;
 }
 
@@ -354,35 +407,36 @@ bignumber bignumber::operator-(const bignumber &obj) {
   bignumber b2;
   b2 = obj;
 
-  if (b1 == b2) return res;
-
-  if (b2.negative) {
+  if (b1 == b2 && !b1.negative && !b2.negative) {  //+b1 - (+b2), abs(b1) = abs(b2)
+    return bignumber((uint8_t)0);
+  }else 
+  if (b1 == b2 &&  b1.negative && !b2.negative) {  //-b1 -(+b2) = -b1 - b2, abs(b1) = abs(b2)
     res = b1 + b2;
+    res.negative = true;
+    return res;
+  }else
+  if (b1 == b2 &&  b1.negative && b2.negative) {  //-b1 -(-b2) = -b1 + b2, abs(b1) = abs(b2)
+    return bignumber((uint8_t)0);
+  }else
+  if (b1.negative && !b2.negative) {  //-b1 - (+b2) = -b1 - b2
+    res = b1 + b2;
+    res.negative = true;
     return res;
   }
   b1.optimize();
   b2.optimize();
+  //b1.printBIN(); std::cout << std::endl;
+  //b2.printBIN(); std::cout << std::endl;
   digit *tmp1 = b1.GetFristDigit(), *tmp2 = b2.GetFristDigit();
 
-  // wyrownaie bitow - obie liczby tyle samo bitow
-  while (tmp1 != NULL && tmp2 != NULL) {
-    tmp1 = tmp1->GetNextDigit();
-    tmp2 = tmp2->GetNextDigit();
-  }
-  while (tmp1 != NULL) {
-    tmp1 = tmp1->GetNextDigit();
-    b2.push_data((uint8_t)0);
-  }
-  while (tmp2 != NULL) {
-    tmp2 = tmp2->GetNextDigit();
-    b1.push_data((uint8_t)0);
-  }
+  b1.EqualBits(b2);
+  //b1.printBIN(); std::cout << std::endl;
+ // b2.printBIN(); std::cout << std::endl;
   // przygotowanie liczby b2 do odejmowania w kodzie zu2
   b2.not_bits();  // negacja wszystkich bitow w kodzie zu2
-
   b2.addone();  // dodanie jedynki do liczby w kodzie zu2, ostatni bit jest
                 // tracony
-  b2.set_minus();  // ustawienie najstarszego bitu liczby na 1
+  //b2.set_minus();  // ustawienie najstarszego bitu liczby na 1
   tmp1 = b1.GetFristDigit();
   tmp2 = b2.GetFristDigit();
   uint16_t sum = 0, t1, t2;
@@ -408,19 +462,18 @@ bignumber bignumber::operator-(const bignumber &obj) {
     res.push_data((uint8_t)sum);
     sum >>= 8;
     tmp2 = tmp2->GetNextDigit();
-  }
-  if ((res.GetLastDigit()->GetData() >> 7) &
-      1) {  // jeżeli ostatni bit liczby równy jest 1 to liczba jest ujemna
+  } /*
+  if ((res.GetLastDigit()->GetData() >> 7) & 1) {  // jeżeli ostatni bit liczby równy jest 1 to liczba jest ujemna
     res.SetNegative(true);
     res.not_bits();
     res.addone();
-  }
+  }*/
   return res;
 }
 bignumber bignumber::operator+(const bignumber &obj) {
   bignumber res;
   digit *tmp1 = this->GetFristDigit(), *tmp2 = obj.GetFristDigit();
-  uint16_t sum = 0, t1, t2;
+  uint16_t sum = 0, t1, t2; //TODO warible +t1 + (-t2)
   while (tmp1 != NULL && tmp2 != NULL) {
     t1 = tmp1->GetData();
     t2 = tmp2->GetData();
@@ -451,8 +504,10 @@ bignumber bignumber::operator+(const bignumber &obj) {
   res.optimize();
   return res;
 }
-bignumber &bignumber::operator=(const bignumber &obj) {
+
+bignumber& bignumber::operator=(const bignumber &obj) {
   if (this == &obj) return *this;
+  this->negative = obj.negative;
   digit *tmp1 = obj.GetFristDigit();
   this->rm_all_bits();
   while (tmp1 != NULL) {
@@ -482,8 +537,7 @@ bool bignumber::operator==(const bignumber &obj) {
     return false;
   return true;
 }
-bool bignumber::operator!=(
-    const bignumber &obj) {  
+bool bignumber::operator!=(const bignumber &obj) {  
   return !(*this == obj);
 }
 bool bignumber::operator>=(
@@ -525,8 +579,16 @@ bool bignumber::operator>=(
   }
   return true;
 }
+bool bignumber::operator<(bignumber &obj) { 
+  bignumber b1, b2;
+  b1 = *this;
+  b2 = obj;
+  
+  return (!(b1>=b2));
+}
+
 bool bignumber::operator<=(bignumber &obj) {}
-bool bignumber::operator<(bignumber &obj) {}
+
 bool bignumber::operator>(bignumber &obj) {}
 
 void bignumber::operator++() {

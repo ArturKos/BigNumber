@@ -1,8 +1,11 @@
-FLAGS=-Wall -Wextra
-OBJS=main.cpp include/bignumber.cpp include/digit.cpp
-TEST=test.cpp include/bignumber.cpp include/digit.cpp
+FLAGS=-Wall -Wextra -O0 -g -pedantic
+OBJS=main.cpp src/bignumber.cpp src/digit.cpp
+TEST=test.cpp src/bignumber.cpp src/digit.cpp
 
-cut: $(OBJS)
+.PHONY: bignumber 
+.PHONT: test 
+
+bignumber: $(OBJS)	
 	$(CXX) $(FLAGS) $(OBJS) -o bignumber
 
 test: $(TEST)

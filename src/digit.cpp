@@ -1,4 +1,4 @@
-#include "digit.h"
+#include "../include/digit.h"
 
 digit::digit() {
   prev = NULL;
@@ -25,4 +25,4 @@ bool digit::operator==(digit &d) { return this->GetData() == d.GetData(); }
 bool digit::operator!=(digit &d) { return this->GetData() != d.GetData(); }
 bool digit::operator>(digit &d) { return this->GetData() > d.GetData(); }
 bool digit::operator<(digit &d) { return this->GetData() < d.GetData(); }
-digit &digit::operator=(const digit &obj) { this->SetData(obj.GetData()); }
+digit &digit::operator=(const digit &obj) { this->SetData(obj.GetData()); return *this;}
