@@ -10,7 +10,11 @@ To compile tessts, need to have GoogleTest framework and CMake installed on your
 
 To compile tests, fallow:
 -mkdir build
+
 -cd build
+
 -cmake ..
+
 -make
+
 -./runTests
