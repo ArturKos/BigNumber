@@ -5,3 +5,12 @@ Perhaps the possibility of exponentiation, priming and checking if a given numbe
 Binary, hexadecimal and decimal number display available. 
 
 Project in progress. Currently working on the printDEC function.
+
+To compile tessts, need to have GoogleTest framework and CMake installed on your system.
+
+To compile tests, fallow:
+-mkdir build
+-cd build
+-cmake ..
+-make
+-./runTests
