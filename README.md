@@ -9,6 +9,7 @@ Project in progress. Currently working on tests and improving library.
 To compile tessts, need to have GoogleTest framework and CMake installed on your system.
 
 To compile tests, fallow:
+
 -mkdir build
 
 -cd build
