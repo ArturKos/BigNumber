@@ -20,7 +20,7 @@ To compile tests, follow:
 
 -./runTests
 
-Latest commit verified by valgrind:
+# Latest commit verified by valgrind:
 
 valgrind ./runTests 
 
