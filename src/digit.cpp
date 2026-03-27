@@ -6,23 +6,23 @@ digit::digit() {
   digit8bit = 0;
 }
 
-digit::digit(uint8_t d) {
+digit::digit(uint8_t value) {
   prev = NULL;
   next = NULL;
-  digit8bit = d;
+  digit8bit = value;
 }
-void digit::SetData(uint8_t d) { digit8bit = d; }
-uint8_t digit::GetData() const { return digit8bit; }
+void digit::set_data(uint8_t value) { digit8bit = value; }
+uint8_t digit::get_data() const { return digit8bit; }
 
-digit *digit::GetPrevDigit() { return prev; }
+digit *digit::get_prev() { return prev; }
 
-digit *digit::GetNextDigit() { return next; }
+digit *digit::get_next() { return next; }
 
-void digit::SetPrevDigit(digit *d) { prev = d; }
+void digit::set_prev(digit *node) { prev = node; }
 
-void digit::SetNextDigit(digit *d) { next = d; }
-bool digit::operator==(digit &d) { return this->GetData() == d.GetData(); }
-bool digit::operator!=(digit &d) { return this->GetData() != d.GetData(); }
-bool digit::operator>(digit &d) { return this->GetData() > d.GetData(); }
-bool digit::operator<(digit &d) { return this->GetData() < d.GetData(); }
-digit &digit::operator=(const digit &obj) { this->SetData(obj.GetData()); return *this;}
+void digit::set_next(digit *node) { next = node; }
+bool digit::operator==(digit &other) { return this->get_data() == other.get_data(); }
+bool digit::operator!=(digit &other) { return this->get_data() != other.get_data(); }
+bool digit::operator>(digit &other) { return this->get_data() > other.get_data(); }
+bool digit::operator<(digit &other) { return this->get_data() < other.get_data(); }
+digit &digit::operator=(const digit &other) { this->set_data(other.get_data()); return *this;}
